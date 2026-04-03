@@ -213,6 +213,50 @@ class Room {
     }
   }
 
+  resolvePlayerCollisions() {
+    const players = [...this.players.values()];
+    for (let i = 0; i < players.length; i++) {
+      for (let j = i + 1; j < players.length; j++) {
+        const a = players[i];
+        const b = players[j];
+
+        // AABB 충돌 체크
+        const overlapX = Math.min(a.x + PLAYER_WIDTH, b.x + PLAYER_WIDTH) - Math.max(a.x, b.x);
+        const overlapY = Math.min(a.y + PLAYER_HEIGHT, b.y + PLAYER_HEIGHT) - Math.max(a.y, b.y);
+
+        if (overlapX <= 0 || overlapY <= 0) continue;
+
+        // 겹침이 적은 축으로 밀어냄
+        if (overlapX < overlapY) {
+          // 좌우로 밀어냄
+          const pushX = overlapX / 2;
+          if (a.x < b.x) {
+            a.x -= pushX;
+            b.x += pushX;
+          } else {
+            a.x += pushX;
+            b.x -= pushX;
+          }
+        } else {
+          // 위아래로 밀어냄
+          const pushY = overlapY / 2;
+          if (a.y < b.y) {
+            // a가 위에 있음 → a는 b 위에 착지
+            a.y -= pushY;
+            b.y += pushY;
+            a.onGround = true;
+            a.vy = 0;
+          } else {
+            b.y -= pushY;
+            a.y += pushY;
+            b.onGround = true;
+            b.vy = 0;
+          }
+        }
+      }
+    }
+  }
+
   handleInput(socketId, input) {
     const player = this.players.get(socketId);
     if (!player) return;
@@ -249,22 +293,46 @@ class Room {
       // 중력
       player.vy += GRAVITY;
 
-      // 위치 업데이트
+      // X축 이동 후 충돌
       player.x += player.vx;
-      player.y += player.vy;
-
-      // 플랫폼 충돌
-      player.onGround = false;
       player.onIce = false;
       for (const plat of this.stage.platforms) {
+        const platType = plat.type || 'normal';
         if (
           player.x + PLAYER_WIDTH > plat.x &&
           player.x < plat.x + plat.w &&
           player.y + PLAYER_HEIGHT > plat.y &&
-          player.y + PLAYER_HEIGHT < plat.y + plat.h + player.vy + 5
+          player.y < plat.y + plat.h
         ) {
-          const platType = plat.type || 'normal';
+          // 가시: 닿으면 전체 리셋
+          if (platType === 'spike') {
+            this.resetAllPlayers();
+            return;
+          }
+          // 점프대는 옆에서 막히지 않음
+          if (platType === 'bounce') continue;
 
+          // 좌우 벽 충돌
+          if (player.vx > 0) {
+            player.x = plat.x - PLAYER_WIDTH;
+          } else if (player.vx < 0) {
+            player.x = plat.x + plat.w;
+          }
+          player.vx = 0;
+        }
+      }
+
+      // Y축 이동 후 충돌
+      player.y += player.vy;
+      player.onGround = false;
+      for (const plat of this.stage.platforms) {
+        const platType = plat.type || 'normal';
+        if (
+          player.x + PLAYER_WIDTH > plat.x &&
+          player.x < plat.x + plat.w &&
+          player.y + PLAYER_HEIGHT > plat.y &&
+          player.y < plat.y + plat.h
+        ) {
           // 가시: 닿으면 전체 리셋
           if (platType === 'spike') {
             this.resetAllPlayers();
@@ -279,19 +347,21 @@ class Room {
           }
 
           if (player.vy >= 0) {
+            // 위에서 착지
             player.y = plat.y - PLAYER_HEIGHT;
             player.vy = 0;
             player.onGround = true;
 
-            // 얼음: 미끄러짐 적용
             if (platType === 'ice') {
               player.onIce = true;
             }
-
-            // 이동발판: 플레이어도 같이 이동
             if (platType === 'moving') {
               player.x += plat.moveSpeed * plat.moveDir;
             }
+          } else {
+            // 아래에서 머리 부딪힘
+            player.y = plat.y + plat.h;
+            player.vy = 0;
           }
         }
       }
@@ -319,6 +389,9 @@ class Room {
         this.playersAtGoal.delete(socketId);
       }
     }
+
+    // 플레이어 간 충돌 처리 (서로 통과 불가)
+    this.resolvePlayerCollisions();
 
     // 모든 플레이어가 골에 도달하면 다음 스테이지
     if (this.playersAtGoal.size === this.players.size && this.players.size > 0) {

@@ -230,6 +230,34 @@ document.addEventListener('keyup', (e) => {
   if (changed) network.sendInput({ ...keys });
 });
 
+// === 모바일 조작 ===
+
+function setupMobileButton(btnId, key) {
+  const btn = document.getElementById(btnId);
+
+  btn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    keys[key] = true;
+    network.sendInput({ ...keys });
+  });
+
+  btn.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    keys[key] = false;
+    network.sendInput({ ...keys });
+  });
+
+  btn.addEventListener('touchcancel', (e) => {
+    e.preventDefault();
+    keys[key] = false;
+    network.sendInput({ ...keys });
+  });
+}
+
+setupMobileButton('btn-mobile-left', 'left');
+setupMobileButton('btn-mobile-right', 'right');
+setupMobileButton('btn-mobile-jump', 'jump');
+
 // === 유틸 ===
 
 function showError(msg) {
