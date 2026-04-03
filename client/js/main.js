@@ -190,6 +190,27 @@ network.onGameState = ({ players, stage }) => {
   game.updateState(players, stage);
 };
 
+// 게임 나가기 버튼
+document.getElementById('btn-leave-game').addEventListener('click', async () => {
+  try {
+    const { players, maxPlayers, roomCode } = await network.leaveGame();
+    game.running = false;
+    gameScreenEl.classList.add('hidden');
+    waitingRoomEl.classList.remove('hidden');
+    updatePlayerList(players, maxPlayers);
+  } catch (err) {
+    showError(err);
+  }
+});
+
+// 다른 사람이 나가기 눌렀을 때 전원 대기실로 복귀
+network.onGameStopped = ({ players, maxPlayers }) => {
+  game.running = false;
+  gameScreenEl.classList.add('hidden');
+  waitingRoomEl.classList.remove('hidden');
+  updatePlayerList(players, maxPlayers);
+};
+
 // 키보드 입력
 const keys = { left: false, right: false, jump: false };
 

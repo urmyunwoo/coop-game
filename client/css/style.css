@@ -197,17 +197,32 @@ select {
   align-items: center;
 }
 
+#game-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 1200px;
+  margin-bottom: 8px;
+}
+
+#game-top-bar #stage-name {
+  font-size: 18px;
+  color: #4ECDC4;
+  font-weight: bold;
+}
+
+#btn-leave-game {
+  background: #e74c3c;
+  color: #ffffff;
+  padding: 8px 20px;
+  font-size: 14px;
+  flex: none;
+}
+
 #game-canvas {
   border: 2px solid #0f3460;
   border-radius: 8px;
   background: #1a1a2e;
-}
-
-#stage-name {
-  margin-top: 12px;
-  font-size: 18px;
-  color: #4ECDC4;
-  font-weight: bold;
 }
 
 /* 맵 에디터 버튼 */

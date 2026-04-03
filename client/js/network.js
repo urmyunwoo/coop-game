@@ -6,6 +6,7 @@ class Network {
     this.onPlayerLeft = null;
     this.onGameStarted = null;
     this.onGameState = null;
+    this.onGameStopped = null;
 
     this.setupListeners();
   }
@@ -25,6 +26,10 @@ class Network {
 
     this.socket.on('game-state', (data) => {
       if (this.onGameState) this.onGameState(data);
+    });
+
+    this.socket.on('game-stopped', (data) => {
+      if (this.onGameStopped) this.onGameStopped(data);
     });
   }
 
@@ -49,6 +54,15 @@ class Network {
   startGame() {
     return new Promise((resolve, reject) => {
       this.socket.emit('start-game', null, (response) => {
+        if (response.error) reject(response.error);
+        else resolve(response);
+      });
+    });
+  }
+
+  leaveGame() {
+    return new Promise((resolve, reject) => {
+      this.socket.emit('leave-game', null, (response) => {
         if (response.error) reject(response.error);
         else resolve(response);
       });

@@ -83,6 +83,32 @@ io.on('connection', (socket) => {
     callback({ success: true });
   });
 
+  // 게임 중 나가기 (방은 유지, 대기실로 복귀)
+  socket.on('leave-game', (_, callback) => {
+    const room = roomManager.getRoomByPlayer(socket.id);
+    if (!room) return callback({ error: '방을 찾을 수 없습니다.' });
+
+    // 게임 중이면 대기 상태로 되돌림
+    if (room.state === 'playing') {
+      room.state = 'waiting';
+    }
+
+    callback({
+      success: true,
+      players: room.getPlayers(),
+      maxPlayers: room.maxPlayers,
+      roomCode: room.code,
+    });
+
+    // 같은 방의 다른 플레이어들도 대기실로 돌려보냄
+    socket.to(room.code).emit('game-stopped', {
+      players: room.getPlayers(),
+      maxPlayers: room.maxPlayers,
+    });
+
+    console.log(`[게임 나가기] ${socket.id} → ${room.code} (대기실로 복귀)`);
+  });
+
   // 플레이어 입력 처리
   socket.on('player-input', (input) => {
     const room = roomManager.getRoomByPlayer(socket.id);
