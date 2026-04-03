@@ -1,0 +1,13 @@
+{
+  "name": "coop-game",
+  "version": "1.0.0",
+  "description": "피코파크 스타일 협동 멀티플레이어 게임",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.4"
+  }
+}

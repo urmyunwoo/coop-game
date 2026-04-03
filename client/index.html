@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>협동 게임</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- 로비 화면 -->
+  <div id="lobby">
+    <h1>🎮 협동 게임</h1>
+    <div class="lobby-box">
+      <input type="text" id="nickname" placeholder="닉네임 입력" maxlength="8">
+
+      <div class="lobby-buttons">
+        <button id="btn-create">방 만들기</button>
+        <button id="btn-join-toggle">방 참가하기</button>
+      </div>
+
+      <!-- 방 만들기 옵션 -->
+      <div id="create-options" class="hidden">
+        <label>최대 인원:
+          <select id="max-players">
+            <option value="2">2명</option>
+            <option value="3">3명</option>
+            <option value="4" selected>4명</option>
+            <option value="5">5명</option>
+            <option value="6">6명</option>
+            <option value="8">8명</option>
+          </select>
+        </label>
+        <button id="btn-create-confirm">방 생성!</button>
+      </div>
+
+      <!-- 방 참가 옵션 -->
+      <div id="join-options" class="hidden">
+        <input type="text" id="room-code" placeholder="방 코드 입력" maxlength="6">
+        <button id="btn-join-confirm">참가!</button>
+      </div>
+
+      <p id="error-msg" class="hidden"></p>
+    </div>
+  </div>
+
+  <!-- 대기실 화면 -->
+  <div id="waiting-room" class="hidden">
+    <h2>대기실</h2>
+    <p>방 코드: <span id="display-room-code" class="room-code"></span></p>
+    <p id="player-count"></p>
+    <ul id="player-list"></ul>
+    <button id="btn-start" class="hidden">게임 시작</button>
+    <button id="btn-editor" class="hidden">맵 에디터</button>
+    <p id="waiting-msg">방장이 게임을 시작할 때까지 대기 중...</p>
+  </div>
+
+  <!-- 게임 화면 -->
+  <div id="game-screen" class="hidden">
+    <canvas id="game-canvas" width="1200" height="600"></canvas>
+    <div id="stage-name"></div>
+  </div>
+
+  <!-- 맵 에디터 화면 -->
+  <div id="editor-screen" class="hidden">
+    <div id="editor-header">
+      <h2>맵 에디터</h2>
+      <div id="editor-actions">
+        <input type="text" id="editor-map-name" placeholder="맵 이름" maxlength="20">
+        <button id="btn-editor-save">저장하고 플레이</button>
+        <button id="btn-editor-clear">전체 지우기</button>
+        <button id="btn-editor-back">돌아가기</button>
+      </div>
+    </div>
+    <div id="editor-body">
+      <div id="editor-toolbar">
+        <p class="toolbar-title">블록</p>
+        <div id="block-list">
+          <button class="block-btn selected" data-type="normal">
+            <span class="block-preview block-preview-normal"></span>
+            일반
+          </button>
+          <button class="block-btn" data-type="ice">
+            <span class="block-preview block-preview-ice"></span>
+            얼음
+          </button>
+          <button class="block-btn" data-type="spike">
+            <span class="block-preview block-preview-spike"></span>
+            가시
+          </button>
+          <button class="block-btn" data-type="bounce">
+            <span class="block-preview block-preview-bounce"></span>
+            점프대
+          </button>
+          <button class="block-btn" data-type="moving">
+            <span class="block-preview block-preview-moving"></span>
+            이동발판
+          </button>
+        </div>
+        <p class="toolbar-title">특수</p>
+        <div id="special-list">
+          <button class="block-btn" data-type="spawn">
+            <span class="block-preview block-preview-spawn"></span>
+            스폰
+          </button>
+          <button class="block-btn" data-type="goal">
+            <span class="block-preview block-preview-goal"></span>
+            골
+          </button>
+          <button class="block-btn" data-type="eraser">
+            <span class="block-preview block-preview-eraser"></span>
+            지우개
+          </button>
+        </div>
+        <p class="toolbar-title">도움말</p>
+        <div class="toolbar-help">
+          <p>좌클릭: 블록 배치</p>
+          <p>우클릭: 블록 삭제</p>
+          <p>드래그: 연속 배치</p>
+        </div>
+      </div>
+      <canvas id="editor-canvas" width="1200" height="600"></canvas>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/network.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/editor.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

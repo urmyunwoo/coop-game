@@ -1,0 +1,376 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #0a0a1a;
+  color: #ffffff;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* 로비 */
+#lobby {
+  text-align: center;
+}
+
+#lobby h1 {
+  font-size: 2.5rem;
+  margin-bottom: 30px;
+  color: #4ECDC4;
+}
+
+.lobby-box {
+  background: #16213e;
+  padding: 40px;
+  border-radius: 16px;
+  min-width: 360px;
+}
+
+.lobby-box input[type="text"] {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #0f3460;
+  border-radius: 8px;
+  background: #1a1a2e;
+  color: #ffffff;
+  font-size: 16px;
+  margin-bottom: 16px;
+  outline: none;
+  text-align: center;
+}
+
+.lobby-box input[type="text"]:focus {
+  border-color: #4ECDC4;
+}
+
+.lobby-buttons {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.1s, opacity 0.2s;
+  flex: 1;
+}
+
+button:hover {
+  transform: scale(1.03);
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+#btn-create {
+  background: #4ECDC4;
+  color: #1a1a2e;
+}
+
+#btn-join-toggle {
+  background: #FF6B6B;
+  color: #ffffff;
+}
+
+#btn-create-confirm {
+  background: #4ECDC4;
+  color: #1a1a2e;
+  width: 100%;
+  margin-top: 8px;
+}
+
+#btn-join-confirm {
+  background: #FF6B6B;
+  color: #ffffff;
+  width: 100%;
+  margin-top: 8px;
+}
+
+#create-options,
+#join-options {
+  margin-top: 12px;
+  padding: 16px;
+  background: #1a1a2e;
+  border-radius: 8px;
+}
+
+#create-options label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+}
+
+select {
+  padding: 8px 12px;
+  border: 2px solid #0f3460;
+  border-radius: 6px;
+  background: #16213e;
+  color: #ffffff;
+  font-size: 14px;
+  outline: none;
+}
+
+#error-msg {
+  color: #FF6B6B;
+  margin-top: 12px;
+  font-weight: bold;
+}
+
+/* 대기실 */
+#waiting-room {
+  text-align: center;
+  background: #16213e;
+  padding: 40px;
+  border-radius: 16px;
+  min-width: 360px;
+}
+
+#waiting-room h2 {
+  margin-bottom: 16px;
+  color: #4ECDC4;
+}
+
+.room-code {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #FFD700;
+  letter-spacing: 6px;
+  background: #1a1a2e;
+  padding: 8px 20px;
+  border-radius: 8px;
+  display: inline-block;
+  margin: 8px 0;
+  user-select: all;
+}
+
+#player-count {
+  margin: 12px 0;
+  color: #aaa;
+}
+
+#player-list {
+  list-style: none;
+  margin: 16px 0;
+}
+
+#player-list li {
+  padding: 8px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+#btn-start {
+  background: #4ECDC4;
+  color: #1a1a2e;
+  width: 100%;
+  font-size: 18px;
+  padding: 14px;
+  margin-top: 12px;
+}
+
+#waiting-msg {
+  color: #888;
+  margin-top: 12px;
+}
+
+/* 게임 화면 */
+#game-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#game-canvas {
+  border: 2px solid #0f3460;
+  border-radius: 8px;
+  background: #1a1a2e;
+}
+
+#stage-name {
+  margin-top: 12px;
+  font-size: 18px;
+  color: #4ECDC4;
+  font-weight: bold;
+}
+
+/* 맵 에디터 버튼 */
+#btn-editor {
+  background: #9b59b6;
+  color: #ffffff;
+  width: 100%;
+  font-size: 16px;
+  padding: 12px;
+  margin-top: 8px;
+}
+
+/* 맵 에디터 */
+#editor-screen {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+#editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #16213e;
+  border-radius: 12px 12px 0 0;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+#editor-header h2 {
+  color: #4ECDC4;
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+#editor-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+#editor-map-name {
+  padding: 8px 12px;
+  border: 2px solid #0f3460;
+  border-radius: 6px;
+  background: #1a1a2e;
+  color: #ffffff;
+  font-size: 14px;
+  outline: none;
+  width: 160px;
+}
+
+#editor-map-name:focus {
+  border-color: #4ECDC4;
+}
+
+#editor-actions button {
+  flex: none;
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+#btn-editor-save {
+  background: #4ECDC4;
+  color: #1a1a2e;
+}
+
+#btn-editor-clear {
+  background: #e74c3c;
+  color: #ffffff;
+}
+
+#btn-editor-back {
+  background: #555;
+  color: #ffffff;
+}
+
+#editor-body {
+  display: flex;
+  gap: 0;
+  background: #0f0f23;
+  border-radius: 0 0 12px 12px;
+  overflow: hidden;
+}
+
+#editor-toolbar {
+  width: 150px;
+  min-width: 150px;
+  background: #16213e;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.toolbar-title {
+  color: #888;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 8px;
+  margin-bottom: 4px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #0f3460;
+}
+
+.block-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: #1a1a2e;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  color: #ccc;
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  flex: none;
+}
+
+.block-btn:hover {
+  border-color: #4ECDC4;
+  transform: none;
+}
+
+.block-btn.selected {
+  border-color: #4ECDC4;
+  color: #ffffff;
+  background: #0f3460;
+}
+
+.block-preview {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.block-preview-normal { background: #16213e; border: 2px solid #0f3460; }
+.block-preview-ice { background: #a8d8ea; border: 2px solid #6bb3d9; }
+.block-preview-spike { background: #ff4757; border: 2px solid #c0392b; }
+.block-preview-bounce { background: #2ecc71; border: 2px solid #27ae60; }
+.block-preview-moving { background: #9b59b6; border: 2px solid #8e44ad; }
+.block-preview-spawn { background: #4ECDC4; border: 2px solid #3aafa9; }
+.block-preview-goal { background: #FFD700; border: 2px solid #daa520; }
+.block-preview-eraser { background: #555; border: 2px dashed #888; }
+
+.toolbar-help {
+  margin-top: auto;
+}
+
+.toolbar-help p {
+  color: #666;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+#editor-canvas {
+  border: none;
+  cursor: crosshair;
+  display: block;
+}
