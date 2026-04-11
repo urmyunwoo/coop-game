@@ -432,12 +432,11 @@ class RoomManager {
   }
 
   generateCode() {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let code;
     do {
       code = '';
       for (let i = 0; i < 6; i++) {
-        code += chars[Math.floor(Math.random() * chars.length)];
+        code += Math.floor(Math.random() * 10);
       }
     } while (this.rooms.has(code));
     return code;
