@@ -4,7 +4,8 @@ const BLOCK_COLORS = {
   ice:    { fill: '#a8d8ea', stroke: '#6bb3d9' },
   spike:  { fill: '#ff4757', stroke: '#c0392b' },
   bounce: { fill: '#2ecc71', stroke: '#27ae60' },
-  moving: { fill: '#9b59b6', stroke: '#8e44ad' },
+  moving:     { fill: '#9b59b6', stroke: '#8e44ad' },
+  checkpoint: { fill: '#f39c12', stroke: '#e67e22' },
 };
 
 // 게임 캔버스 렌더링
@@ -84,6 +85,27 @@ class Game {
       ctx.font = 'bold 16px Arial';
       ctx.textAlign = 'center';
       ctx.fillText('↔', plat.x + plat.w / 2, plat.y + plat.h / 2 + 6);
+    }
+
+    // 체크포인트 깃발
+    if (type === 'checkpoint') {
+      const cx = plat.x + plat.w / 2;
+      const activated = plat.activated;
+      // 깃대
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(cx, plat.y + plat.h);
+      ctx.lineTo(cx, plat.y + 4);
+      ctx.stroke();
+      // 깃발
+      ctx.fillStyle = activated ? '#2ecc71' : '#e74c3c';
+      ctx.beginPath();
+      ctx.moveTo(cx, plat.y + 4);
+      ctx.lineTo(cx + 14, plat.y + 12);
+      ctx.lineTo(cx, plat.y + 20);
+      ctx.closePath();
+      ctx.fill();
     }
   }
 

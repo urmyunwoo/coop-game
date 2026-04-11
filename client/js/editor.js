@@ -11,7 +11,8 @@ const BLOCK_TYPES = {
   ice:    { name: '얼음', color: '#a8d8ea', border: '#6bb3d9' },
   spike:  { name: '가시', color: '#ff4757', border: '#c0392b' },
   bounce: { name: '점프대', color: '#2ecc71', border: '#27ae60' },
-  moving: { name: '이동발판', color: '#9b59b6', border: '#8e44ad' },
+  moving:     { name: '이동발판', color: '#9b59b6', border: '#8e44ad' },
+  checkpoint: { name: '체크포인트', color: '#f39c12', border: '#e67e22' },
 };
 
 class MapEditor {
@@ -116,6 +117,57 @@ class MapEditor {
     this.spawnPos = { col: 1, row: 13 };
     this.goalPos = { col: 28, row: 13 };
     this.render();
+  }
+
+  // 맵을 localStorage에 저장
+  saveMap(name) {
+    const saveData = {
+      name: name || this.mapName || '커스텀 맵',
+      grid: this.grid,
+      spawnPos: this.spawnPos,
+      goalPos: this.goalPos,
+      savedAt: new Date().toLocaleString(),
+    };
+    const savedMaps = this.getSavedMaps();
+    // 같은 이름이면 덮어쓰기
+    const idx = savedMaps.findIndex(m => m.name === saveData.name);
+    if (idx >= 0) {
+      savedMaps[idx] = saveData;
+    } else {
+      savedMaps.push(saveData);
+    }
+    localStorage.setItem('saved-maps', JSON.stringify(savedMaps));
+    return saveData.name;
+  }
+
+  // 저장된 맵 목록 가져오기
+  getSavedMaps() {
+    try {
+      return JSON.parse(localStorage.getItem('saved-maps')) || [];
+    } catch {
+      return [];
+    }
+  }
+
+  // 저장된 맵 불러오기
+  loadMap(index) {
+    const savedMaps = this.getSavedMaps();
+    if (index < 0 || index >= savedMaps.length) return false;
+    const data = savedMaps[index];
+    this.grid = data.grid;
+    this.spawnPos = data.spawnPos;
+    this.goalPos = data.goalPos;
+    this.mapName = data.name;
+    this.render();
+    return data.name;
+  }
+
+  // 저장된 맵 삭제
+  deleteMap(index) {
+    const savedMaps = this.getSavedMaps();
+    if (index < 0 || index >= savedMaps.length) return;
+    savedMaps.splice(index, 1);
+    localStorage.setItem('saved-maps', JSON.stringify(savedMaps));
   }
 
   // 맵 데이터를 서버에 보낼 형식으로 변환
@@ -228,6 +280,23 @@ class MapEditor {
             ctx.font = '18px Arial';
             ctx.textAlign = 'center';
             ctx.fillText('↑', bx + GRID_SIZE / 2, by + GRID_SIZE / 2 + 6);
+          }
+          // 체크포인트 깃발
+          if (type === 'checkpoint') {
+            const cx = bx + GRID_SIZE / 2;
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(cx, by + GRID_SIZE);
+            ctx.lineTo(cx, by + 4);
+            ctx.stroke();
+            ctx.fillStyle = '#e74c3c';
+            ctx.beginPath();
+            ctx.moveTo(cx, by + 4);
+            ctx.lineTo(cx + 12, by + 11);
+            ctx.lineTo(cx, by + 18);
+            ctx.closePath();
+            ctx.fill();
           }
         }
       }

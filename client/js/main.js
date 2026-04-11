@@ -159,6 +159,76 @@ document.getElementById('btn-editor-back').addEventListener('click', () => {
   waitingRoomEl.classList.remove('hidden');
 });
 
+// 맵 저장
+document.getElementById('btn-editor-save-map').addEventListener('click', () => {
+  if (!editor) return;
+  const mapNameInput = document.getElementById('editor-map-name');
+  const name = mapNameInput.value.trim() || '커스텀 맵';
+  editor.mapName = name;
+  const savedName = editor.saveMap(name);
+  alert(`"${savedName}" 맵이 저장되었습니다!`);
+});
+
+// 불러오기 토글
+document.getElementById('btn-editor-load-toggle').addEventListener('click', () => {
+  const panel = document.getElementById('saved-maps-panel');
+  panel.classList.toggle('hidden');
+  if (!panel.classList.contains('hidden')) {
+    refreshSavedMapsList();
+  }
+});
+
+// 닫기
+document.getElementById('btn-close-saved-maps').addEventListener('click', () => {
+  document.getElementById('saved-maps-panel').classList.add('hidden');
+});
+
+function refreshSavedMapsList() {
+  if (!editor) return;
+  const list = document.getElementById('saved-maps-list');
+  const noMaps = document.getElementById('no-saved-maps');
+  const maps = editor.getSavedMaps();
+
+  list.innerHTML = '';
+  if (maps.length === 0) {
+    noMaps.classList.remove('hidden');
+    return;
+  }
+  noMaps.classList.add('hidden');
+
+  maps.forEach((map, idx) => {
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <span class="saved-map-name">${map.name}</span>
+      <span class="saved-map-date">${map.savedAt || ''}</span>
+      <div class="saved-map-actions">
+        <button class="saved-map-load" data-idx="${idx}">불러오기</button>
+        <button class="saved-map-delete" data-idx="${idx}">삭제</button>
+      </div>
+    `;
+    list.appendChild(li);
+  });
+
+  // 불러오기 버튼
+  list.querySelectorAll('.saved-map-load').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const name = editor.loadMap(parseInt(btn.dataset.idx));
+      if (name) {
+        document.getElementById('editor-map-name').value = name;
+        document.getElementById('saved-maps-panel').classList.add('hidden');
+      }
+    });
+  });
+
+  // 삭제 버튼
+  list.querySelectorAll('.saved-map-delete').forEach(btn => {
+    btn.addEventListener('click', () => {
+      editor.deleteMap(parseInt(btn.dataset.idx));
+      refreshSavedMapsList();
+    });
+  });
+}
+
 // 저장하고 플레이
 document.getElementById('btn-editor-save').addEventListener('click', async () => {
   if (!editor) return;

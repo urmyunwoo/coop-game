@@ -61,6 +61,8 @@ class Room {
     this.stageIndex = 0;
     this.stage = null;
     this.playersAtGoal = new Set();
+    this.checkpointX = null;
+    this.checkpointY = null;
   }
 
   addPlayer(socketId, nickname) {
@@ -132,6 +134,8 @@ class Room {
     this.customMap = mapData;
     this.stage = { ...mapData };
     this.playersAtGoal.clear();
+    this.checkpointX = null;
+    this.checkpointY = null;
     this.initMovingPlatforms();
 
     let i = 0;
@@ -163,6 +167,8 @@ class Room {
     this.stage = { ...STAGES[this.stageIndex] };
     this.stage.platforms = STAGES[this.stageIndex].platforms.map(p => ({ ...p }));
     this.playersAtGoal.clear();
+    this.checkpointX = null;
+    this.checkpointY = null;
     this.initMovingPlatforms();
 
     // 플레이어 위치 초기화 (옆으로 나란히)
@@ -202,10 +208,12 @@ class Room {
 
   resetAllPlayers() {
     this.playersAtGoal.clear();
+    const respawnX = this.checkpointX != null ? this.checkpointX : this.stage.spawnX;
+    const respawnY = this.checkpointY != null ? this.checkpointY : this.stage.spawnY;
     let i = 0;
     for (const [, player] of this.players) {
-      player.x = this.stage.spawnX + i * (PLAYER_WIDTH + 10);
-      player.y = this.stage.spawnY;
+      player.x = respawnX + i * (PLAYER_WIDTH + 10);
+      player.y = respawnY;
       player.vx = 0;
       player.vy = 0;
       player.onGround = false;
@@ -298,17 +306,30 @@ class Room {
       player.onIce = false;
       for (const plat of this.stage.platforms) {
         const platType = plat.type || 'normal';
+
+        // 가시: 히트박스 축소 (좌우 30%, 위 40% 영역만 판정)
+        if (platType === 'spike') {
+          const spikeMarginX = plat.w * 0.3;
+          const spikeTop = plat.y + plat.h * 0.1;
+          const spikeBottom = plat.y + plat.h * 0.5;
+          if (
+            player.x + PLAYER_WIDTH > plat.x + spikeMarginX &&
+            player.x < plat.x + plat.w - spikeMarginX &&
+            player.y + PLAYER_HEIGHT > spikeTop &&
+            player.y < spikeBottom
+          ) {
+            this.resetAllPlayers();
+            return;
+          }
+          continue;
+        }
+
         if (
           player.x + PLAYER_WIDTH > plat.x &&
           player.x < plat.x + plat.w &&
           player.y + PLAYER_HEIGHT > plat.y &&
           player.y < plat.y + plat.h
         ) {
-          // 가시: 닿으면 전체 리셋
-          if (platType === 'spike') {
-            this.resetAllPlayers();
-            return;
-          }
           // 점프대는 옆에서 막히지 않음
           if (platType === 'bounce') continue;
 
@@ -327,17 +348,30 @@ class Room {
       player.onGround = false;
       for (const plat of this.stage.platforms) {
         const platType = plat.type || 'normal';
+
+        // 가시: 히트박스 축소
+        if (platType === 'spike') {
+          const spikeMarginX = plat.w * 0.3;
+          const spikeTop = plat.y + plat.h * 0.1;
+          const spikeBottom = plat.y + plat.h * 0.5;
+          if (
+            player.x + PLAYER_WIDTH > plat.x + spikeMarginX &&
+            player.x < plat.x + plat.w - spikeMarginX &&
+            player.y + PLAYER_HEIGHT > spikeTop &&
+            player.y < spikeBottom
+          ) {
+            this.resetAllPlayers();
+            return;
+          }
+          continue;
+        }
+
         if (
           player.x + PLAYER_WIDTH > plat.x &&
           player.x < plat.x + plat.w &&
           player.y + PLAYER_HEIGHT > plat.y &&
           player.y < plat.y + plat.h
         ) {
-          // 가시: 닿으면 전체 리셋
-          if (platType === 'spike') {
-            this.resetAllPlayers();
-            return;
-          }
 
           // 점프대: 강하게 튕김
           if (platType === 'bounce' && player.vy >= 0) {
@@ -375,6 +409,24 @@ class Room {
       // 화면 좌우 경계
       if (player.x < 0) player.x = 0;
       if (player.x + PLAYER_WIDTH > CANVAS_WIDTH) player.x = CANVAS_WIDTH - PLAYER_WIDTH;
+
+      // 체크포인트 체크
+      for (const plat of this.stage.platforms) {
+        if ((plat.type || 'normal') !== 'checkpoint') continue;
+        if (
+          player.x + PLAYER_WIDTH > plat.x &&
+          player.x < plat.x + plat.w &&
+          player.y + PLAYER_HEIGHT > plat.y &&
+          player.y < plat.y + plat.h
+        ) {
+          // 새 체크포인트 활성화
+          if (this.checkpointX !== plat.x || this.checkpointY !== plat.y - PLAYER_HEIGHT) {
+            this.checkpointX = plat.x;
+            this.checkpointY = plat.y - PLAYER_HEIGHT;
+            plat.activated = true;
+          }
+        }
+      }
 
       // 골 체크
       if (

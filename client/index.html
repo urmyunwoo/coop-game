@@ -80,9 +80,20 @@
       <div id="editor-actions">
         <input type="text" id="editor-map-name" placeholder="맵 이름" maxlength="20">
         <button id="btn-editor-save">저장하고 플레이</button>
+        <button id="btn-editor-save-map">맵 저장</button>
+        <button id="btn-editor-load-toggle">불러오기</button>
         <button id="btn-editor-clear">전체 지우기</button>
         <button id="btn-editor-back">돌아가기</button>
       </div>
+    </div>
+    <!-- 저장된 맵 목록 -->
+    <div id="saved-maps-panel" class="hidden">
+      <div id="saved-maps-header">
+        <h3>저장된 맵</h3>
+        <button id="btn-close-saved-maps">닫기</button>
+      </div>
+      <ul id="saved-maps-list"></ul>
+      <p id="no-saved-maps" class="hidden">저장된 맵이 없습니다.</p>
     </div>
     <div id="editor-body">
       <div id="editor-toolbar">
@@ -107,6 +118,10 @@
           <button class="block-btn" data-type="moving">
             <span class="block-preview block-preview-moving"></span>
             이동발판
+          </button>
+          <button class="block-btn" data-type="checkpoint">
+            <span class="block-preview block-preview-checkpoint"></span>
+            체크포인트
           </button>
         </div>
         <p class="toolbar-title">특수</p>

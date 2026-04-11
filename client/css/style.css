@@ -359,9 +359,103 @@ select {
   color: #1a1a2e;
 }
 
+#btn-editor-save-map {
+  background: #3498db;
+  color: #ffffff;
+}
+
+#btn-editor-load-toggle {
+  background: #f39c12;
+  color: #1a1a2e;
+}
+
 #btn-editor-clear {
   background: #e74c3c;
   color: #ffffff;
+}
+
+/* 저장된 맵 패널 */
+#saved-maps-panel {
+  background: #16213e;
+  padding: 16px;
+  border-radius: 0 0 8px 8px;
+  border-top: 2px solid #0f3460;
+}
+
+#saved-maps-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+#saved-maps-header h3 {
+  color: #4ECDC4;
+  margin: 0;
+}
+
+#btn-close-saved-maps {
+  background: #555;
+  color: #fff;
+  padding: 6px 14px;
+  font-size: 12px;
+  flex: none;
+}
+
+#saved-maps-list {
+  list-style: none;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+#saved-maps-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #1a1a2e;
+  border-radius: 6px;
+  margin-bottom: 6px;
+}
+
+.saved-map-name {
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.saved-map-date {
+  color: #888;
+  font-size: 11px;
+  margin-left: 12px;
+}
+
+.saved-map-actions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.saved-map-load {
+  background: #4ECDC4;
+  color: #1a1a2e;
+  padding: 4px 12px;
+  font-size: 12px;
+  flex: none;
+}
+
+.saved-map-delete {
+  background: #e74c3c;
+  color: #ffffff;
+  padding: 4px 12px;
+  font-size: 12px;
+  flex: none;
+}
+
+#no-saved-maps {
+  color: #888;
+  text-align: center;
+  padding: 16px;
 }
 
 #btn-editor-back {
@@ -437,6 +531,7 @@ select {
 .block-preview-spike { background: #ff4757; border: 2px solid #c0392b; }
 .block-preview-bounce { background: #2ecc71; border: 2px solid #27ae60; }
 .block-preview-moving { background: #9b59b6; border: 2px solid #8e44ad; }
+.block-preview-checkpoint { background: #f39c12; border: 2px solid #e67e22; }
 .block-preview-spawn { background: #4ECDC4; border: 2px solid #3aafa9; }
 .block-preview-goal { background: #FFD700; border: 2px solid #daa520; }
 .block-preview-eraser { background: #555; border: 2px dashed #888; }
