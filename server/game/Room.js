@@ -307,6 +307,9 @@ class Room {
       for (const plat of this.stage.platforms) {
         const platType = plat.type || 'normal';
 
+        // 체크포인트는 좌우 통과 가능
+        if (platType === 'checkpoint') continue;
+
         // 가시: 히트박스 축소 (좌우 30%, 위 40% 영역만 판정)
         if (platType === 'spike') {
           const spikeMarginX = plat.w * 0.3;
@@ -348,6 +351,28 @@ class Room {
       player.onGround = false;
       for (const plat of this.stage.platforms) {
         const platType = plat.type || 'normal';
+
+        // 체크포인트: 위에서 내려올 때만 착지 (단방향 플랫폼)
+        if (platType === 'checkpoint') {
+          if (
+            player.vy >= 0 &&
+            player.x + PLAYER_WIDTH > plat.x &&
+            player.x < plat.x + plat.w &&
+            player.y + PLAYER_HEIGHT > plat.y &&
+            player.y + PLAYER_HEIGHT < plat.y + plat.h
+          ) {
+            player.y = plat.y - PLAYER_HEIGHT;
+            player.vy = 0;
+            player.onGround = true;
+            // 체크포인트 활성화
+            if (this.checkpointX !== plat.x || this.checkpointY !== plat.y - PLAYER_HEIGHT) {
+              this.checkpointX = plat.x;
+              this.checkpointY = plat.y - PLAYER_HEIGHT;
+              plat.activated = true;
+            }
+          }
+          continue;
+        }
 
         // 가시: 히트박스 축소
         if (platType === 'spike') {
@@ -409,24 +434,6 @@ class Room {
       // 화면 좌우 경계
       if (player.x < 0) player.x = 0;
       if (player.x + PLAYER_WIDTH > CANVAS_WIDTH) player.x = CANVAS_WIDTH - PLAYER_WIDTH;
-
-      // 체크포인트 체크
-      for (const plat of this.stage.platforms) {
-        if ((plat.type || 'normal') !== 'checkpoint') continue;
-        if (
-          player.x + PLAYER_WIDTH > plat.x &&
-          player.x < plat.x + plat.w &&
-          player.y + PLAYER_HEIGHT > plat.y &&
-          player.y < plat.y + plat.h
-        ) {
-          // 새 체크포인트 활성화
-          if (this.checkpointX !== plat.x || this.checkpointY !== plat.y - PLAYER_HEIGHT) {
-            this.checkpointX = plat.x;
-            this.checkpointY = plat.y - PLAYER_HEIGHT;
-            plat.activated = true;
-          }
-        }
-      }
 
       // 골 체크
       if (
