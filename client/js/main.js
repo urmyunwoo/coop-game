@@ -1,5 +1,6 @@
 // 메인 진입점: UI 이벤트 바인딩 + 네트워크 연결
 const network = new Network();
+network.setupListeners();
 const game = new Game(document.getElementById('game-canvas'));
 let editor = null;
 

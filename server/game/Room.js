@@ -79,6 +79,7 @@ class Room {
       onPlayer: false,
       beingStoodOn: false,
       input: { left: false, right: false, jump: false },
+      prevX: 0,
       prevY: 0,
     };
 
@@ -218,12 +219,16 @@ class Room {
     const respawnY = this.checkpointY != null ? this.checkpointY : this.stage.spawnY;
     let i = 0;
     for (const [, player] of this.players) {
-      player.x = this.stage.spawnX + i * (PLAYER_WIDTH + 10);
-      player.y = this.stage.spawnY;
+      player.x = respawnX + i * (PLAYER_WIDTH + 10);
+      player.y = respawnY;
+      player.prevX = player.x;
       player.prevY = player.y;
       player.vx = 0;
       player.vy = 0;
       player.onGround = false;
+      player.onIce = false;
+      player.onPlayer = false;
+      player.beingStoodOn = false;
       i++;
     }
   }
@@ -307,6 +312,7 @@ class Room {
 
     for (const [socketId, player] of this.players) {
       // 이전 위치 저장
+      player.prevX = player.x;
       player.prevY = player.y;
 
       // 좌우 이동 (얼음 위에서는 미끄러짐)
@@ -336,37 +342,7 @@ class Room {
       player.x += player.vx;
 
       for (const plat of this.stage.platforms) {
-        if (player.x + PLAYER_WIDTH > plat.x && player.x < plat.x + plat.w &&
-            player.y + PLAYER_HEIGHT > plat.y && player.y < plat.y + plat.h) {
-          const platType = plat.type || 'normal';
-
-          if (platType === 'spike') {
-            this.resetAllPlayers();
-            return;
-          }
-
-          // 벽 충돌: 옆으로 밀어냄
-          if (player.vx > 0) {
-            player.x = plat.x - PLAYER_WIDTH;
-          } else if (player.vx < 0) {
-            player.x = plat.x + plat.w;
-          }
-          player.vx = 0;
-        }
-      }
-
-      // Y축 이동 및 바닥/천장 충돌
-      player.y += player.vy;
-
-      player.onGround = false;
-      player.onIce = false;
-      player.onPlayer = false;
-      player.beingStoodOn = false;
-      for (const plat of this.stage.platforms) {
         const platType = plat.type || 'normal';
-
-        // 체크포인트는 좌우 통과 가능
-        if (platType === 'checkpoint') continue;
 
         // 가시: 히트박스 축소 (좌우 30%, 위 40% 영역만 판정)
         if (platType === 'spike') {
@@ -385,28 +361,31 @@ class Room {
           continue;
         }
 
+        const isSolidSide = platType === 'normal' || platType === 'ice' || platType === 'moving';
+        if (!isSolidSide) continue;
+
         if (
           player.x + PLAYER_WIDTH > plat.x &&
           player.x < plat.x + plat.w &&
           player.y + PLAYER_HEIGHT > plat.y &&
           player.y < plat.y + plat.h
         ) {
-          // 점프대는 옆에서 막히지 않음
-          if (platType === 'bounce') continue;
-
-          // 좌우 벽 충돌
           if (player.vx > 0) {
             player.x = plat.x - PLAYER_WIDTH;
+            player.vx = 0;
           } else if (player.vx < 0) {
             player.x = plat.x + plat.w;
+            player.vx = 0;
           }
-          player.vx = 0;
         }
       }
 
-      // Y축 이동 후 충돌
+      // Y축 이동 및 바닥/천장 충돌
       player.y += player.vy;
       player.onGround = false;
+      player.onIce = false;
+      player.onPlayer = false;
+      player.beingStoodOn = false;
       for (const plat of this.stage.platforms) {
         const platType = plat.type || 'normal';
 
@@ -416,8 +395,8 @@ class Room {
             player.vy >= 0 &&
             player.x + PLAYER_WIDTH > plat.x &&
             player.x < plat.x + plat.w &&
-            player.y + PLAYER_HEIGHT > plat.y &&
-            player.y + PLAYER_HEIGHT < plat.y + plat.h
+            player.prevY + PLAYER_HEIGHT <= plat.y &&
+            player.y + PLAYER_HEIGHT >= plat.y
           ) {
             player.y = plat.y - PLAYER_HEIGHT;
             player.vy = 0;
@@ -455,17 +434,23 @@ class Room {
           player.y + PLAYER_HEIGHT > plat.y &&
           player.y < plat.y + plat.h
         ) {
-
-          // 점프대: 강하게 튕김
-          if (platType === 'bounce' && player.vy >= 0) {
-            player.y = plat.y - PLAYER_HEIGHT;
-            player.vy = BOUNCE_FORCE;
-            player.onGround = false;
+          if (platType === 'bounce') {
+            if (player.vy >= 0) {
+              player.y = plat.y - PLAYER_HEIGHT;
+              player.vy = BOUNCE_FORCE;
+              player.onGround = false;
+            } else if (player.vy < 0) {
+              player.y = plat.y + plat.h;
+              player.vy = 0;
+            }
             continue;
           }
 
-          if (player.vy >= 0) {
-            // 착지 (위에서 내려올 때)
+          const isSolid = platType === 'normal' || platType === 'ice' || platType === 'moving';
+          if (!isSolid) continue;
+
+          if (player.vy > 0) {
+            // 위에서 내려올 때 착지
             player.y = plat.y - PLAYER_HEIGHT;
             player.vy = 0;
             player.onGround = true;
@@ -476,8 +461,8 @@ class Room {
             if (platType === 'moving') {
               player.x += plat.moveSpeed * plat.moveDir;
             }
-          } else {
-            // 천장 충돌 (위로 올라갈 때 머리 부딪힘)
+          } else if (player.vy < 0) {
+            // 아래에서 올라올 때 머리 부딪힘
             player.y = plat.y + plat.h;
             player.vy = 0;
           }
@@ -517,11 +502,6 @@ class Room {
             player.x = other.x + PLAYER_WIDTH;
           }
           player.vx = 0;
-          } else {
-            // 아래에서 머리 부딪힘
-            player.y = plat.y + plat.h;
-            player.vy = 0;
-          }
         }
       }
 
