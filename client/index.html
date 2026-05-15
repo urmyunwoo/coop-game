@@ -2,20 +2,32 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>협동 게임</title>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=1">
 </head>
 <body>
   <!-- 로비 화면 -->
+  <p id="error-msg" class="hidden"></p>
   <div id="lobby">
     <h1>🎮 협동 게임</h1>
     <div class="lobby-box">
       <input type="text" id="nickname" placeholder="닉네임 입력" maxlength="8">
 
+      <div class="color-selection">
+        <label>캐릭터 색상 선택:</label>
+        <div id="color-buttons" class="color-buttons">
+          <!-- 색상 버튼들은 JavaScript로 동적으로 생성 -->
+        </div>
+      </div>
+
       <div class="lobby-buttons">
         <button id="btn-create">방 만들기</button>
         <button id="btn-join-toggle">방 참가하기</button>
+        <button id="btn-solo">혼자 하기</button>
       </div>
 
       <!-- 방 만들기 옵션 -->
@@ -35,7 +47,7 @@
 
       <!-- 방 참가 옵션 -->
       <div id="join-options" class="hidden">
-        <input type="text" id="room-code" placeholder="방 코드 입력" maxlength="6" inputmode="numeric" pattern="[0-9]*">
+        <input type="text" id="room-code" placeholder="방 번호 입력 (숫자)" maxlength="6" inputmode="numeric" pattern="[0-9]*">
         <button id="btn-join-confirm">참가!</button>
       </div>
 
@@ -51,7 +63,17 @@
     <ul id="player-list"></ul>
     <button id="btn-start" class="hidden">게임 시작</button>
     <button id="btn-editor" class="hidden">맵 에디터</button>
+    <button id="btn-load-map" class="hidden">맵 불러오기</button>
     <p id="waiting-msg">방장이 게임을 시작할 때까지 대기 중...</p>
+  </div>
+
+  <!-- 맵 로드 화면 -->
+  <div id="load-map-screen" class="hidden">
+    <h2>저장된 맵 목록</h2>
+    <div id="map-list-container">
+      <ul id="map-list"></ul>
+    </div>
+    <button id="btn-load-map-back">돌아가기</button>
   </div>
 
   <!-- 게임 화면 -->
@@ -59,6 +81,10 @@
     <div id="game-top-bar">
       <div id="stage-name"></div>
       <button id="btn-leave-game">나가기</button>
+    </div>
+    <div id="game-header">
+      <div id="stage-name"></div>
+      <button id="btn-quit-game">나가기</button>
     </div>
     <canvas id="game-canvas" width="1200" height="600"></canvas>
     <!-- 모바일 조작 버튼 (터치 기기에서만 표시) -->
@@ -151,10 +177,10 @@
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
-  <script src="js/network.js"></script>
-  <script src="js/player.js"></script>
-  <script src="js/game.js"></script>
-  <script src="js/editor.js"></script>
-  <script src="js/main.js"></script>
+  <script src="js/network.js?v=1"></script>
+  <script src="js/player.js?v=1"></script>
+  <script src="js/game.js?v=1"></script>
+  <script src="js/editor.js?v=1"></script>
+  <script src="js/main.js?v=1"></script>
 </body>
 </html>

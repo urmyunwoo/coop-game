@@ -133,6 +133,39 @@ select {
   font-weight: bold;
 }
 
+/* 색상 선택 */
+.color-selection {
+  margin-bottom: 16px;
+}
+
+.color-selection label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #4ECDC4;
+}
+
+.color-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.color-button {
+  width: 40px;
+  height: 40px;
+  border: 3px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.color-button.selected {
+  border-color: #ffffff;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
 /* 대기실 */
 #waiting-room {
   text-align: center;
@@ -219,12 +252,71 @@ select {
   flex: none;
 }
 
+#game-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 1200px;
+  margin-bottom: 8px;
+}
+#game-top-bar #stage-name {
+  font-size: 18px;
+  color: #4ECDC4;
+  font-weight: bold;
+}
+#btn-leave-game {
+  background: #e74c3c;
+  color: #ffffff;
+  padding: 8px 20px;
+  font-size: 14px;
+  flex: none;
+}
+#game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+  padding: 12px 16px;
+  background: #16213e;
+  border-radius: 8px 8px 0 0;
+  margin-bottom: -2px;
+  gap: 20px;
+}
+#stage-name {
+  font-size: 18px;
+  color: #4ECDC4;
+  font-weight: bold;
+  flex: 1;
+}
+#btn-quit-game {
+  background: #ff4757;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+#btn-quit-game:hover {
+  background: #ff3838;
+  transform: scale(1.05);
+}
+#btn-quit-game:active {
+  transform: scale(0.98);
+}
 #game-canvas {
   border: 2px solid #0f3460;
   border-radius: 8px;
   background: #1a1a2e;
 }
-
+#game-canvas {
+  border: 2px solid #0f3460;
+  border-radius: 0 0 8px 8px;
+  background: #1a1a2e;
+}
 /* 모바일 조작 버튼 */
 #mobile-controls {
   display: none;
@@ -235,16 +327,13 @@ select {
   padding: 12px 16px;
   margin-top: 8px;
 }
-
 #mobile-left {
   display: flex;
   gap: 12px;
 }
-
 #mobile-right {
   display: flex;
 }
-
 .mobile-btn {
   width: 70px;
   height: 70px;
@@ -261,12 +350,10 @@ select {
   -webkit-user-select: none;
   touch-action: manipulation;
 }
-
 .mobile-btn:active {
   background: rgba(78, 205, 196, 0.4);
   border-color: #4ECDC4;
 }
-
 .mobile-btn-jump {
   width: 90px;
   height: 90px;
@@ -274,32 +361,198 @@ select {
   background: rgba(78, 205, 196, 0.2);
   border-color: rgba(78, 205, 196, 0.4);
 }
-
-/* 터치 기기에서만 모바일 컨트롤 표시 */
 @media (pointer: coarse) {
   #mobile-controls {
     display: flex;
   }
-
   #game-canvas {
     width: 100%;
     height: auto;
   }
-
   #game-top-bar {
     width: 100%;
     max-width: 1200px;
   }
 }
+#game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+  padding: 12px 16px;
+  background: #16213e;
+  border-radius: 8px 8px 0 0;
+  margin-bottom: -2px;
+  gap: 20px;
+}
+
+#stage-name {
+  font-size: 18px;
+  color: #4ECDC4;
+  font-weight: bold;
+  flex: 1;
+}
+
+#btn-quit-game {
+  background: #ff4757;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+#btn-quit-game:hover {
+  background: #ff3838;
+  transform: scale(1.05);
+}
+
+#btn-quit-game:active {
+  transform: scale(0.98);
+}
+
+#game-canvas {
+  border: 2px solid #0f3460;
+  border-radius: 0 0 8px 8px;
+  background: #1a1a2e;
+}
 
 /* 맵 에디터 버튼 */
-#btn-editor {
+#btn-editor,
+#btn-solo {
   background: #9b59b6;
   color: #ffffff;
   width: 100%;
   font-size: 16px;
   padding: 12px;
   margin-top: 8px;
+}
+
+#btn-solo {
+  background: #2ecc71;
+}
+
+#btn-load-map {
+  background: #3498db;
+  color: #ffffff;
+  width: 100%;
+  font-size: 16px;
+  padding: 12px;
+  margin-top: 8px;
+}
+
+/* 맵 로드 화면 */
+#load-map-screen {
+  text-align: center;
+  background: #16213e;
+  padding: 30px;
+  border-radius: 16px;
+  min-width: 400px;
+  max-width: 600px;
+}
+
+#load-map-screen h2 {
+  margin-bottom: 20px;
+  color: #4ECDC4;
+}
+
+#map-list-container {
+  background: #1a1a2e;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+  min-height: 100px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+#map-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#map-list li {
+  background: #16213e;
+  padding: 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 2px solid #0f3460;
+  transition: all 0.3s ease;
+}
+
+#map-list li:hover {
+  border-color: #4ECDC4;
+  background: #0f3460;
+}
+
+.map-item-info {
+  text-align: left;
+  flex: 1;
+}
+
+.map-item-name {
+  font-weight: bold;
+  color: #4ECDC4;
+  margin-bottom: 4px;
+}
+
+.map-item-time {
+  font-size: 12px;
+  color: #888;
+}
+
+.map-item-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.map-item-buttons button {
+  padding: 6px 12px;
+  font-size: 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.map-load-btn {
+  background: #2ecc71;
+  color: #ffffff;
+}
+
+.map-load-btn:hover {
+  background: #27ae60;
+}
+
+.map-delete-btn {
+  background: #e74c3c;
+  color: #ffffff;
+}
+
+.map-delete-btn:hover {
+  background: #c0392b;
+}
+
+#btn-load-map-back {
+  background: #555;
+  color: #ffffff;
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#btn-load-map-back:hover {
+  background: #666;
 }
 
 /* 맵 에디터 */

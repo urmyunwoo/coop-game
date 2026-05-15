@@ -25,9 +25,10 @@ class Game {
     this.render();
   }
 
-  updateState(players, stage) {
+  updateState(players, stage, stageIndex) {
     this.players = players;
     this.stage = stage;
+    this.stageIndex = stageIndex;
   }
 
   drawPlatform(ctx, plat) {

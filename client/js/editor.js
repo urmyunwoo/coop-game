@@ -119,55 +119,45 @@ class MapEditor {
     this.render();
   }
 
-  // 맵을 localStorage에 저장
-  saveMap(name) {
-    const saveData = {
-      name: name || this.mapName || '커스텀 맵',
+  // 로컬 스토리지에 맵 저장
+  saveToLocalStorage(mapName) {
+    const mapData = {
+      name: mapName,
       grid: this.grid,
       spawnPos: this.spawnPos,
       goalPos: this.goalPos,
-      savedAt: new Date().toLocaleString(),
+      timestamp: new Date().toLocaleString('ko-KR'),
     };
-    const savedMaps = this.getSavedMaps();
-    // 같은 이름이면 덮어쓰기
-    const idx = savedMaps.findIndex(m => m.name === saveData.name);
-    if (idx >= 0) {
-      savedMaps[idx] = saveData;
-    } else {
-      savedMaps.push(saveData);
-    }
-    localStorage.setItem('saved-maps', JSON.stringify(savedMaps));
-    return saveData.name;
+    const maps = JSON.parse(localStorage.getItem('savedMaps') || '{}');
+    maps[mapName] = mapData;
+    localStorage.setItem('savedMaps', JSON.stringify(maps));
+    return mapData;
   }
 
-  // 저장된 맵 목록 가져오기
-  getSavedMaps() {
-    try {
-      return JSON.parse(localStorage.getItem('saved-maps')) || [];
-    } catch {
-      return [];
-    }
-  }
+  // 로컬 스토리지에서 맵 로드
+  loadFromLocalStorage(mapName) {
+    const maps = JSON.parse(localStorage.getItem('savedMaps') || '{}');
+    const mapData = maps[mapName];
+    if (!mapData) return false;
 
-  // 저장된 맵 불러오기
-  loadMap(index) {
-    const savedMaps = this.getSavedMaps();
-    if (index < 0 || index >= savedMaps.length) return false;
-    const data = savedMaps[index];
-    this.grid = data.grid;
-    this.spawnPos = data.spawnPos;
-    this.goalPos = data.goalPos;
-    this.mapName = data.name;
+    this.grid = mapData.grid;
+    this.spawnPos = mapData.spawnPos;
+    this.goalPos = mapData.goalPos;
+    this.mapName = mapData.name;
     this.render();
-    return data.name;
+    return true;
+  }
+
+  // 저장된 맵 목록 조회
+  static getSavedMaps() {
+    return JSON.parse(localStorage.getItem('savedMaps') || '{}');
   }
 
   // 저장된 맵 삭제
-  deleteMap(index) {
-    const savedMaps = this.getSavedMaps();
-    if (index < 0 || index >= savedMaps.length) return;
-    savedMaps.splice(index, 1);
-    localStorage.setItem('saved-maps', JSON.stringify(savedMaps));
+  static deleteMap(mapName) {
+    const maps = JSON.parse(localStorage.getItem('savedMaps') || '{}');
+    delete maps[mapName];
+    localStorage.setItem('savedMaps', JSON.stringify(maps));
   }
 
   // 맵 데이터를 서버에 보낼 형식으로 변환

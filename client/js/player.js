@@ -1,4 +1,4 @@
-// 플레이어 렌더링 - 픽셀아트 검정 실루엣 스타일
+// 플레이어 렌더링 (피코파크 스타일)
 const PLAYER_WIDTH = 32;
 const PLAYER_HEIGHT = 32;
 const PIXEL = 2; // 픽셀 단위 (16x16 해상도로 그려서 2배 확대)
@@ -114,6 +114,22 @@ const SPRITES = {
   ],
 };
 
+// 색상을 어둡게 만드는 헬퍼
+function darkenColor(hex, amount) {
+  const num = parseInt(hex.slice(1), 16);
+  let r = (num >> 16) - amount;
+  let g = ((num >> 8) & 0xFF) - amount;
+  let b = (num & 0xFF) - amount;
+  r = Math.max(0, r);
+  g = Math.max(0, g);
+  b = Math.max(0, b);
+  return `rgb(${r},${g},${b})`;
+}
+
+// 각 플레이어의 이전 위치 기억 (걷기 애니메이션용)
+const playerAnimState = {};
+let animTick = 0;
+
 function drawPlayer(ctx, player, isMe) {
   const anim = getAnimState(player.id);
 
@@ -180,6 +196,66 @@ function drawPlayer(ctx, player, isMe) {
 
   // 플레이어 색상 외곽선 (구분용)
   ctx.fillStyle = player.color;
+  roundRect(ctx, x, y, w, bodyH, 8);
+  ctx.fill();
+
+  // 몸체 테두리
+  ctx.strokeStyle = darkenColor(player.color, 60);
+  ctx.lineWidth = 2;
+  roundRect(ctx, x, y, w, bodyH, 8);
+  ctx.stroke();
+
+  // 몸체 하이라이트 (왼쪽 위 광택)
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+  roundRect(ctx, x + 3, y + 3, w * 0.4, bodyH * 0.3, 5);
+  ctx.fill();
+
+  // === 눈 ===
+  const eyeY = y + bodyH * 0.35;
+  const eyeW = 9;
+  const eyeH = 10;
+  const eyeGap = 2;
+  const eyeLeftX = x + w / 2 - eyeW - eyeGap / 2;
+  const eyeRightX = x + w / 2 + eyeGap / 2;
+
+  // 흰자
+  ctx.fillStyle = '#FFFFFF';
+  roundRect(ctx, eyeLeftX, eyeY, eyeW, eyeH, 3);
+  ctx.fill();
+  roundRect(ctx, eyeRightX, eyeY, eyeW, eyeH, 3);
+  ctx.fill();
+
+  // 눈동자 (이동 방향에 따라 이동)
+  const pupilSize = 4;
+  const pupilOffsetX = anim.facing * 1.5;
+  const pupilOffsetY = isInAir ? (player.vy > 0 ? 1.5 : -1.5) : 0;
+
+  ctx.fillStyle = '#1a1a2e';
+  ctx.beginPath();
+  ctx.arc(
+    eyeLeftX + eyeW / 2 + pupilOffsetX,
+    eyeY + eyeH / 2 + pupilOffsetY,
+    pupilSize / 2 + 0.5, 0, Math.PI * 2
+  );
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(
+    eyeRightX + eyeW / 2 + pupilOffsetX,
+    eyeY + eyeH / 2 + pupilOffsetY,
+    pupilSize / 2 + 0.5, 0, Math.PI * 2
+  );
+  ctx.fill();
+
+  // === 볼 터치 (귀여움) ===
+  ctx.fillStyle = 'rgba(255, 150, 150, 0.3)';
+  ctx.beginPath();
+  ctx.ellipse(x + 4, eyeY + eyeH + 1, 3.5, 2.5, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(x + w - 4, eyeY + eyeH + 1, 3.5, 2.5, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.restore();
   for (let r = 0; r < sprite.length; r++) {
     for (let c = 0; c < sprite[r].length; c++) {
       if (sprite[r][c] !== '#') continue;
@@ -211,13 +287,37 @@ function drawPlayer(ctx, player, isMe) {
 
   ctx.restore();
 
-  // 닉네임
+  // === 닉네임 ===
+  ctx.save();
   ctx.fillStyle = '#FFFFFF';
+  ctx.font = 'bold 11px Arial';
   ctx.strokeStyle = '#000000';
   ctx.lineWidth = 3;
   ctx.font = 'bold 12px Arial';
   ctx.textAlign = 'center';
   const label = isMe ? `★ ${player.nickname}` : player.nickname;
+
+  // 글자 배경
+  const textWidth = ctx.measureText(label).width;
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+  roundRect(ctx, x + w / 2 - textWidth / 2 - 4, y - 20, textWidth + 8, 15, 4);
+  ctx.fill();
+
+  ctx.fillStyle = isMe ? '#FFD700' : '#FFFFFF';
+  ctx.fillText(label, x + w / 2, y - 9);
+  ctx.restore();
+}
+
+// 둥근 사각형 그리기 헬퍼
+function roundRect(ctx, x, y, w, h, r) {
+  r = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
   ctx.strokeText(label, px + PLAYER_WIDTH / 2, py - 6);
   ctx.fillText(label, px + PLAYER_WIDTH / 2, py - 6);
 }

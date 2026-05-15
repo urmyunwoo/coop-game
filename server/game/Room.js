@@ -37,10 +37,10 @@ const STAGES = [
     name: '스테이지 2 - 높이 올라가기',
     platforms: [
       { x: 0, y: 550, w: 1200, h: 50 },       // 바닥
-      { x: 100, y: 430, w: 200, h: 20 },
-      { x: 400, y: 340, w: 200, h: 20 },
-      { x: 700, y: 250, w: 200, h: 20 },
-      { x: 950, y: 160, w: 200, h: 20 },
+      { x: 100, y: 460, w: 200, h: 20 },
+      { x: 400, y: 390, w: 200, h: 20 },
+      { x: 700, y: 320, w: 200, h: 20 },
+      { x: 950, y: 230, w: 200, h: 20 },
     ],
     spawnX: 50,
     spawnY: 500,
@@ -65,18 +65,21 @@ class Room {
     this.checkpointY = null;
   }
 
-  addPlayer(socketId, nickname) {
+  addPlayer(socketId, nickname, color = null) {
     const playerIndex = this.players.size;
     const player = {
       id: socketId,
       nickname,
-      color: COLORS[playerIndex % COLORS.length],
+      color: color || COLORS[playerIndex % COLORS.length],
       x: 0,
       y: 0,
       vx: 0,
       vy: 0,
       onGround: false,
+      onPlayer: false,
+      beingStoodOn: false,
       input: { left: false, right: false, jump: false },
+      prevY: 0,
     };
 
     this.players.set(socketId, player);
@@ -108,6 +111,9 @@ class Room {
         color: p.color,
         x: p.x,
         y: p.y,
+        vx: p.vx,
+        vy: p.vy,
+        onGround: p.onGround,
         isHost: id === this.host,
       });
     }
@@ -212,8 +218,9 @@ class Room {
     const respawnY = this.checkpointY != null ? this.checkpointY : this.stage.spawnY;
     let i = 0;
     for (const [, player] of this.players) {
-      player.x = respawnX + i * (PLAYER_WIDTH + 10);
-      player.y = respawnY;
+      player.x = this.stage.spawnX + i * (PLAYER_WIDTH + 10);
+      player.y = this.stage.spawnY;
+      player.prevY = player.y;
       player.vx = 0;
       player.vy = 0;
       player.onGround = false;
@@ -274,10 +281,34 @@ class Room {
   update() {
     if (this.state !== 'playing' || !this.stage) return;
 
+    // 스테이지 2: 마우스 끌어당기기
+    if (this.stageIndex === 1) {
+      for (const [socketId, player] of this.players) {
+        if (player.input.mouse && player.input.mouse.pulling) {
+          const mouseX = player.input.mouse.x;
+          const mouseY = player.input.mouse.y;
+          for (const [otherId, other] of this.players) {
+            if (otherId === socketId) continue;
+            const dx = mouseX - (other.x + PLAYER_WIDTH / 2);
+            const dy = mouseY - (other.y + PLAYER_HEIGHT / 2);
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 100) { // 100px 반경 내
+              const force = 0.5; // 끌어당기는 힘
+              other.vx += (dx / dist) * force;
+              other.vy += (dy / dist) * force;
+            }
+          }
+        }
+      }
+    }
+
     // 이동발판 업데이트
     this.updateMovingPlatforms();
 
     for (const [socketId, player] of this.players) {
+      // 이전 위치 저장
+      player.prevY = player.y;
+
       // 좌우 이동 (얼음 위에서는 미끄러짐)
       if (player.onIce) {
         if (player.input.left) player.vx -= ICE_ACCEL;
@@ -292,8 +323,8 @@ class Room {
         if (player.input.right) player.vx = PLAYER_SPEED;
       }
 
-      // 점프
-      if (player.input.jump && player.onGround) {
+      // 점프 (밟힌 사람은 점프 불가, 위에 올라간 사람은 정상 점프 가능)
+      if (player.input.jump && (player.onGround || player.onPlayer) && !player.beingStoodOn) {
         player.vy = JUMP_FORCE;
         player.onGround = false;
       }
@@ -301,9 +332,36 @@ class Room {
       // 중력
       player.vy += GRAVITY;
 
-      // X축 이동 후 충돌
+      // X축 이동 및 벽 충돌
       player.x += player.vx;
+
+      for (const plat of this.stage.platforms) {
+        if (player.x + PLAYER_WIDTH > plat.x && player.x < plat.x + plat.w &&
+            player.y + PLAYER_HEIGHT > plat.y && player.y < plat.y + plat.h) {
+          const platType = plat.type || 'normal';
+
+          if (platType === 'spike') {
+            this.resetAllPlayers();
+            return;
+          }
+
+          // 벽 충돌: 옆으로 밀어냄
+          if (player.vx > 0) {
+            player.x = plat.x - PLAYER_WIDTH;
+          } else if (player.vx < 0) {
+            player.x = plat.x + plat.w;
+          }
+          player.vx = 0;
+        }
+      }
+
+      // Y축 이동 및 바닥/천장 충돌
+      player.y += player.vy;
+
+      player.onGround = false;
       player.onIce = false;
+      player.onPlayer = false;
+      player.beingStoodOn = false;
       for (const plat of this.stage.platforms) {
         const platType = plat.type || 'normal';
 
@@ -400,13 +458,14 @@ class Room {
 
           // 점프대: 강하게 튕김
           if (platType === 'bounce' && player.vy >= 0) {
+            player.y = plat.y - PLAYER_HEIGHT;
             player.vy = BOUNCE_FORCE;
             player.onGround = false;
             continue;
           }
 
           if (player.vy >= 0) {
-            // 위에서 착지
+            // 착지 (위에서 내려올 때)
             player.y = plat.y - PLAYER_HEIGHT;
             player.vy = 0;
             player.onGround = true;
@@ -417,6 +476,47 @@ class Room {
             if (platType === 'moving') {
               player.x += plat.moveSpeed * plat.moveDir;
             }
+          } else {
+            // 천장 충돌 (위로 올라갈 때 머리 부딪힘)
+            player.y = plat.y + plat.h;
+            player.vy = 0;
+          }
+        }
+      }
+
+      // 다른 플레이어 밟기 (피코파크)
+      if (!player.onGround && player.vy >= 0) {
+        for (const [otherId, other] of this.players) {
+          if (otherId === socketId) continue;
+
+          if (player.x + PLAYER_WIDTH > other.x && player.x < other.x + PLAYER_WIDTH &&
+              player.y + PLAYER_HEIGHT > other.y && player.y < other.y &&
+              player.prevY + PLAYER_HEIGHT <= other.y + 4) {
+            player.y = other.y - PLAYER_HEIGHT;
+            player.vy = 0;
+            player.onGround = true;
+            player.onPlayer = true;
+            other.beingStoodOn = true;
+            break;
+          }
+        }
+      }
+
+      // 플레이어끼리 수평 충돌 (겹침 방지)
+      for (const [otherId, other] of this.players) {
+        if (otherId === socketId) continue;
+
+        if (player.x + PLAYER_WIDTH > other.x && player.x < other.x + PLAYER_WIDTH &&
+            player.y + PLAYER_HEIGHT > other.y && player.y < other.y + PLAYER_HEIGHT) {
+          const playerCenterX = player.x + PLAYER_WIDTH / 2;
+          const otherCenterX = other.x + PLAYER_WIDTH / 2;
+
+          if (playerCenterX < otherCenterX) {
+            player.x = other.x - PLAYER_WIDTH;
+          } else {
+            player.x = other.x + PLAYER_WIDTH;
+          }
+          player.vx = 0;
           } else {
             // 아래에서 머리 부딪힘
             player.y = plat.y + plat.h;
@@ -495,7 +595,7 @@ class RoomManager {
     do {
       code = '';
       for (let i = 0; i < 6; i++) {
-        code += Math.floor(Math.random() * 10);
+        code += Math.floor(Math.random() * 10).toString();
       }
     } while (this.rooms.has(code));
     return code;
