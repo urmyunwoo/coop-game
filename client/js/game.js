@@ -27,8 +27,8 @@ class Game {
 
   updateState(players, stage, stageIndex) {
     this.players = players;
-    this.stage = stage;
-    this.stageIndex = stageIndex;
+    if (stage) this.stage = stage;
+    if (stageIndex !== undefined) this.stageIndex = stageIndex;
   }
 
   drawPlatform(ctx, plat) {

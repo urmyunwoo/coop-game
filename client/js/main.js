@@ -370,8 +370,8 @@ network.onGameStarted = ({ players, stage }) => {
   game.start(network.getSocketId());
 };
 
-network.onGameState = ({ players, stage }) => {
-  game.updateState(players, stage);
+network.onGameState = ({ players, stage, stageIndex }) => {
+  game.updateState(players, stage, stageIndex);
 };
 
 // 게임 나가기 버튼

@@ -63,6 +63,9 @@ class Room {
     this.playersAtGoal = new Set();
     this.checkpointX = null;
     this.checkpointY = null;
+    this.stageDirty = true;
+    this.hasMovingPlatforms = false;
+    this.stageBroadcastCounter = 0;
   }
 
   addPlayer(socketId, nickname, color = null) {
@@ -134,6 +137,7 @@ class Room {
     this.stageIndex = 0;
     this.customMap = null;
     this.loadStage();
+    this.stageDirty = true;
   }
 
   startCustomGame(mapData) {
@@ -143,6 +147,8 @@ class Room {
     this.playersAtGoal.clear();
     this.checkpointX = null;
     this.checkpointY = null;
+    this.stageDirty = true;
+    this.stageBroadcastCounter = 0;
     this.initMovingPlatforms();
 
     let i = 0;
@@ -176,6 +182,8 @@ class Room {
     this.playersAtGoal.clear();
     this.checkpointX = null;
     this.checkpointY = null;
+    this.stageDirty = true;
+    this.stageBroadcastCounter = 0;
     this.initMovingPlatforms();
 
     // 플레이어 위치 초기화 (옆으로 나란히)
@@ -193,12 +201,14 @@ class Room {
 
   initMovingPlatforms() {
     if (!this.stage || !this.stage.platforms) return;
+    this.hasMovingPlatforms = false;
     for (const plat of this.stage.platforms) {
       if (plat.type === 'moving') {
         plat.originX = plat.x;
         plat.moveDir = 1;
         plat.moveRange = 120; // 좌우 120px 이동
         plat.moveSpeed = 2;
+        this.hasMovingPlatforms = true;
       }
     }
   }
@@ -210,6 +220,7 @@ class Room {
       plat.x += plat.moveSpeed * plat.moveDir;
       if (plat.x > plat.originX + plat.moveRange) plat.moveDir = -1;
       if (plat.x < plat.originX - plat.moveRange) plat.moveDir = 1;
+      this.stageDirty = true;
     }
   }
 
@@ -406,6 +417,7 @@ class Room {
               this.checkpointX = plat.x;
               this.checkpointY = plat.y - PLAYER_HEIGHT;
               plat.activated = true;
+              this.stageDirty = true;
             }
           }
           continue;

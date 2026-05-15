@@ -240,6 +240,7 @@ io.on('connection', (socket) => {
 
 // 게임 루프: 60fps로 모든 방의 상태를 업데이트하고 브로드캐스트
 const TICK_RATE = 1000 / 60;
+const MOVING_STAGE_BROADCAST_EVERY = 3; // 60fps 기준 20fps로 스테이지 갱신
 
 setInterval(() => {
   for (const room of roomManager.getAllRooms()) {
@@ -247,11 +248,25 @@ setInterval(() => {
 
     room.update();
 
-    io.to(room.code).emit('game-state', {
+    room.stageBroadcastCounter = (room.stageBroadcastCounter + 1) % MOVING_STAGE_BROADCAST_EVERY;
+    const shouldIncludeStage =
+      room.stageDirty || (room.hasMovingPlatforms && room.stageBroadcastCounter === 0);
+
+    const payload = {
       players: room.getPlayers(),
-      stage: room.stage,
-      stageIndex: room.stageIndex,
-    });
+    };
+
+    if (shouldIncludeStage) {
+      payload.stage = room.stage;
+      payload.stageIndex = room.stageIndex;
+    }
+
+    if (room.stageDirty && shouldIncludeStage) {
+      room.stageDirty = false;
+    }
+
+    // Drop stale frames when clients are slow
+    io.to(room.code).volatile.emit('game-state', payload);
   }
 }, TICK_RATE);
 
