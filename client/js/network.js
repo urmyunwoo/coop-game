@@ -2,7 +2,9 @@
 class Network {
   constructor() {
     const origin = window.location.origin;
-    const socketUrl = origin.startsWith('file://') ? 'http://localhost:3000' : origin;
+    const isFileOrigin = window.location.protocol === 'file:' || origin === 'null';
+    const fallbackUrl = isFileOrigin ? 'http://localhost:3000' : origin;
+    const socketUrl = window.SOCKET_URL || fallbackUrl;
     this.socket = io(socketUrl);
     this.onPlayerJoined = null;
     this.onPlayerLeft = null;
@@ -11,10 +13,6 @@ class Network {
     this.onGameStopped = null;
     this.onConnect = null;
     this.onConnectError = null;
-
-      this.onGameStopped = null;
-      this.onConnect = null;
-      this.onConnectError = null;
     this.socket.on('connect', () => {
       console.log('Socket connected:', this.socket.id);
       if (this.onConnect) this.onConnect();

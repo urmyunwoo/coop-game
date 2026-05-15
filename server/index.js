@@ -6,7 +6,16 @@ const { RoomManager } = require('./game/Room');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const allowedOrigins = process.env.CLIENT_ORIGIN
+  ? process.env.CLIENT_ORIGIN.split(',').map((origin) => origin.trim()).filter(Boolean)
+  : '*';
+
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ['GET', 'POST'],
+  },
+});
 
 // 클라이언트 정적 파일 제공
 app.use(express.static(path.join(__dirname, '..', 'client'), {
