@@ -1,7 +1,7 @@
 // 플레이어 렌더링 (피코파크 스타일)
-const PLAYER_WIDTH = 32;
-const PLAYER_HEIGHT = 32;
 const PIXEL = 2; // 픽셀 단위 (16x16 해상도로 그려서 2배 확대)
+const PLAYER_SPRITE_WIDTH = 32;
+const PLAYER_SPRITE_HEIGHT = 32;
 
 // 플레이어별 애니메이션 상태
 const playerAnimState = {};
@@ -168,13 +168,13 @@ function drawPlayer(ctx, player, isMe) {
   // 그림자
   ctx.fillStyle = 'rgba(0,0,0,0.3)';
   ctx.beginPath();
-  ctx.ellipse(px + PLAYER_WIDTH / 2, py + PLAYER_HEIGHT + 2, 12, 3, 0, 0, Math.PI * 2);
+  ctx.ellipse(px + PLAYER_SPRITE_WIDTH / 2, py + PLAYER_SPRITE_HEIGHT + 2, 12, 3, 0, 0, Math.PI * 2);
   ctx.fill();
 
   // 좌우 반전
   ctx.save();
   if (anim.facing === -1) {
-    ctx.translate(px + PLAYER_WIDTH, py);
+    ctx.translate(px + PLAYER_SPRITE_WIDTH, py);
     ctx.scale(-1, 1);
   } else {
     ctx.translate(px, py);
@@ -216,8 +216,8 @@ function drawPlayer(ctx, player, isMe) {
   ctx.textAlign = 'center';
   const textWidth = ctx.measureText(label).width;
   ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-  ctx.fillRect(px + PLAYER_WIDTH / 2 - textWidth / 2 - 4, py - 20, textWidth + 8, 15);
+  ctx.fillRect(px + PLAYER_SPRITE_WIDTH / 2 - textWidth / 2 - 4, py - 20, textWidth + 8, 15);
   ctx.fillStyle = isMe ? '#FFD700' : '#FFFFFF';
-  ctx.fillText(label, px + PLAYER_WIDTH / 2, py - 9);
+  ctx.fillText(label, px + PLAYER_SPRITE_WIDTH / 2, py - 9);
   ctx.restore();
 }

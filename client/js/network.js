@@ -21,6 +21,8 @@ class Network {
       console.error('Socket connect error:', err);
       if (this.onConnectError) this.onConnectError(err);
     });
+
+    this.setupListeners();
   }
 
   setupListeners() {
