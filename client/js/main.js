@@ -37,6 +37,7 @@ const displayRoomCodeEl = document.getElementById('display-room-code');
 const playerCountEl = document.getElementById('player-count');
 const playerListEl = document.getElementById('player-list');
 const btnStart = document.getElementById('btn-start');
+const btnWaitingLeave = document.getElementById('btn-waiting-leave');
 const waitingMsgEl = document.getElementById('waiting-msg');
 
 let currentRoomCode = null;
@@ -115,6 +116,7 @@ function enterWaitingRoom(roomCode, players, maxPlayers) {
 
   displayRoomCodeEl.textContent = roomCode;
   updatePlayerList(players, maxPlayers);
+  btnWaitingLeave.classList.remove('hidden');
 
   if (isHost) {
     btnStart.classList.remove('hidden');
@@ -159,6 +161,27 @@ network.onConnectError = (err) => {
 network.onConnect = () => {
   hideError();
 };
+
+// 대기실에서 게임 나가기
+btnWaitingLeave.addEventListener('click', async () => {
+  try {
+    await network.leaveGame();
+    btnWaitingLeave.classList.add('hidden');
+    btnStart.classList.add('hidden');
+    document.getElementById('btn-editor').classList.add('hidden');
+    document.getElementById('btn-load-map').classList.add('hidden');
+    waitingRoomEl.classList.add('hidden');
+    lobbyEl.classList.remove('hidden');
+    currentRoomCode = null;
+    isHost = false;
+    nicknameInput.value = '';
+    roomCodeInput.value = '';
+    game.running = false;
+    gameScreenEl.classList.add('hidden');
+  } catch (err) {
+    showError(err);
+  }
+});
 
 // 게임 시작 버튼
 btnStart.addEventListener('click', async () => {
