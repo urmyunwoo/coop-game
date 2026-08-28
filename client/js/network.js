@@ -74,15 +74,6 @@ class Network {
     });
   }
 
-  leaveGame() {
-    return new Promise((resolve, reject) => {
-      this.socket.emit('leave-game', null, (response) => {
-        if (response.error) reject(response.error);
-        else resolve(response);
-      });
-    });
-  }
-
   startCustomGame(mapData) {
     return new Promise((resolve, reject) => {
       this.socket.emit('start-custom-game', { mapData }, (response) => {
@@ -100,7 +91,7 @@ class Network {
     return new Promise((resolve, reject) => {
       this.socket.emit('leave-game', null, (response) => {
         if (response && response.error) reject(response.error);
-        else resolve(response);
+        else resolve(response || { success: true });
       });
     });
   }

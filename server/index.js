@@ -164,25 +164,40 @@ io.on('connection', (socket) => {
     const room = roomManager.getRoomByPlayer(socket.id);
     if (!room) return callback({ error: '방을 찾을 수 없습니다.' });
 
-    // 게임 중이면 대기 상태로 되돌림
     if (room.state === 'playing') {
       room.state = 'waiting';
+      callback({
+        success: true,
+        players: room.getPlayers(),
+        maxPlayers: room.maxPlayers,
+        roomCode: room.code,
+      });
+
+      socket.to(room.code).emit('game-stopped', {
+        players: room.getPlayers(),
+        maxPlayers: room.maxPlayers,
+      });
+
+      console.log(`[게임 나가기] ${socket.id} → ${room.code} (대기실로 복귀)`);
+      return;
     }
 
-    callback({
-      success: true,
-      players: room.getPlayers(),
-      maxPlayers: room.maxPlayers,
-      roomCode: room.code,
-    });
+    const wasHost = room.host === socket.id;
+    room.removePlayer(socket.id);
+    roomManager.removePlayerFromRoom(socket.id);
 
-    // 같은 방의 다른 플레이어들도 대기실로 돌려보냄
-    socket.to(room.code).emit('game-stopped', {
-      players: room.getPlayers(),
-      maxPlayers: room.maxPlayers,
-    });
+    if (room.getPlayerCount() === 0) {
+      roomManager.removeRoom(room.code);
+      console.log(`[방 삭제] ${room.code}`);
+    } else {
+      io.to(room.code).emit('player-left', {
+        playerId: socket.id,
+        players: room.getPlayers(),
+        newHost: wasHost ? room.host : null,
+      });
+    }
 
-    console.log(`[게임 나가기] ${socket.id} → ${room.code} (대기실로 복귀)`);
+    callback({ success: true });
   });
 
   // 플레이어 입력 처리
@@ -191,28 +206,6 @@ io.on('connection', (socket) => {
     if (!room || room.state !== 'playing') return;
 
     room.handleInput(socket.id, input);
-  });
-
-  // 게임 나가기
-  socket.on('leave-game', (_, callback) => {
-    const room = roomManager.getRoomByPlayer(socket.id);
-    if (room) {
-      const wasHost = room.host === socket.id;
-      room.removePlayer(socket.id);
-      roomManager.removePlayerFromRoom(socket.id);
-
-      if (room.getPlayerCount() === 0) {
-        roomManager.removeRoom(room.code);
-        console.log(`[방 삭제] ${room.code}`);
-      } else {
-        io.to(room.code).emit('player-left', {
-          playerId: socket.id,
-          players: room.getPlayers(),
-          newHost: wasHost ? room.host : null,
-        });
-      }
-    }
-    callback({ success: true });
   });
 
   // 접속 해제

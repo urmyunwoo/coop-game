@@ -74,7 +74,7 @@ document.getElementById('btn-create-confirm').addEventListener('click', async ()
 });
 
 // 혼자 플레이
-document.getElementById('btn-solo').addEventListener('click', async () => {
+ document.getElementById('btn-solo').addEventListener('click', async () => {
   const nickname = nicknameInput.value.trim();
   if (!nickname) return showError('닉네임을 입력해주세요.');
 
@@ -83,7 +83,6 @@ document.getElementById('btn-solo').addEventListener('click', async () => {
     currentRoomCode = roomCode;
     isHost = true;
     enterWaitingRoom(roomCode, [player], 1);
-    await network.startGame();
   } catch (err) {
     showError(err);
   }
