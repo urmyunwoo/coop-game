@@ -13,7 +13,11 @@
   <!-- 로비 화면 -->
   <p id="error-msg" class="hidden"></p>
   <div id="lobby">
-    <h1>🎮 협동 게임</h1>
+    <div class="title-wrap">
+      <div class="title-icon">🎮</div>
+      <h1>협동 게임</h1>
+    </div>
+
     <div class="lobby-box">
       <input type="text" id="nickname" placeholder="닉네임 입력" maxlength="8">
 
@@ -30,10 +34,23 @@
         <button id="btn-solo">혼자 하기</button>
       </div>
 
-      <!-- 방 만들기 옵션 -->
+      <div class="player-count-box">
+        <label>최대 인원:</label>
+        <select id="max-players">
+          <option value="2">2명</option>
+          <option value="3">3명</option>
+          <option value="4" selected>4명</option>
+          <option value="5">5명</option>
+          <option value="6">6명</option>
+          <option value="8">8명</option>
+        </select>
+      </div>
+
+      <button id="btn-create-confirm" class="wide-button">방 생성!</button>
+
       <div id="create-options" class="hidden">
         <label>최대 인원:
-          <select id="max-players">
+          <select id="max-players-alt">
             <option value="2">2명</option>
             <option value="3">3명</option>
             <option value="4" selected>4명</option>
@@ -42,10 +59,8 @@
             <option value="8">8명</option>
           </select>
         </label>
-        <button id="btn-create-confirm">방 생성!</button>
       </div>
 
-      <!-- 방 참가 옵션 -->
       <div id="join-options" class="hidden">
         <input type="text" id="room-code" placeholder="방 번호 입력 (숫자)" maxlength="6" inputmode="numeric" pattern="[0-9]*">
         <button id="btn-join-confirm">참가!</button>
