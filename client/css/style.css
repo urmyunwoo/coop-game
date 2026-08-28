@@ -5,7 +5,7 @@
 }
 
 body {
-  background: #0a0a1a;
+  background: #020b1a;
   color: #ffffff;
   font-family: 'Segoe UI', Arial, sans-serif;
   display: flex;
@@ -20,72 +20,89 @@ body {
 
 /* 로비 */
 #lobby {
+  width: min(100%, 1000px);
   text-align: center;
 }
 
 #lobby h1 {
-  font-size: 2.5rem;
-  margin-bottom: 30px;
-  color: #4ECDC4;
+  font-size: 3rem;
+  margin-bottom: 28px;
+  color: #4de0d0;
+  font-weight: 800;
+  letter-spacing: -0.04em;
 }
 
 .lobby-box {
-  background: #16213e;
-  padding: 40px;
-  border-radius: 16px;
-  min-width: 360px;
+  background: rgba(23, 40, 62, 0.9);
+  border: 2px solid rgba(72, 157, 217, 0.5);
+  border-radius: 22px;
+  padding: 28px 30px 24px;
+  min-width: 760px;
+  box-shadow: inset 0 0 0 1px rgba(40, 75, 115, 0.4);
 }
 
 .lobby-box input[type="text"] {
   width: 100%;
-  padding: 12px 16px;
-  border: 2px solid #0f3460;
-  border-radius: 8px;
-  background: #1a1a2e;
+  padding: 18px 22px;
+  border: 2px solid #1e6fbf;
+  border-radius: 10px;
+  background: rgba(10, 18, 32, 0.8);
   color: #ffffff;
-  font-size: 16px;
-  margin-bottom: 16px;
+  font-size: 1.1rem;
+  margin-bottom: 18px;
   outline: none;
   text-align: center;
 }
 
 .lobby-box input[type="text"]:focus {
-  border-color: #4ECDC4;
+  border-color: #4de0d0;
+  box-shadow: 0 0 0 2px rgba(77, 224, 208, 0.15);
 }
 
 .lobby-buttons {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 16px;
 }
 
 button {
-  padding: 12px 24px;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: bold;
+  border-radius: 12px;
+  font-size: 1.15rem;
+  font-weight: 800;
   cursor: pointer;
-  transition: transform 0.1s, opacity 0.2s;
+  transition: transform 0.1s ease, filter 0.15s ease;
   flex: 1;
 }
 
 button:hover {
-  transform: scale(1.03);
+  filter: brightness(1.04);
 }
 
 button:active {
-  transform: scale(0.97);
+  transform: scale(0.98);
+}
+
+#btn-create,
+#btn-join-toggle,
+#btn-solo {
+  min-height: 72px;
+  color: #ffffff;
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.1);
 }
 
 #btn-create {
-  background: #4ECDC4;
-  color: #1a1a2e;
+  background: #5ed0cb;
+  color: #0c2233;
 }
 
 #btn-join-toggle {
-  background: #FF6B6B;
-  color: #ffffff;
+  background: #ef6a67;
+}
+
+#btn-solo {
+  background: #59c979;
 }
 
 #btn-create-confirm {
@@ -93,6 +110,7 @@ button:active {
   color: #1a1a2e;
   width: 100%;
   margin-top: 8px;
+  min-height: 60px;
 }
 
 #btn-join-confirm {
@@ -100,30 +118,34 @@ button:active {
   color: #ffffff;
   width: 100%;
   margin-top: 8px;
+  min-height: 60px;
 }
 
 #create-options,
 #join-options {
-  margin-top: 12px;
-  padding: 16px;
-  background: #1a1a2e;
-  border-radius: 8px;
+  margin-top: 16px;
+  padding: 20px 12px 12px;
+  background: rgba(10, 18, 32, 0.8);
+  border-radius: 10px;
+  border: 1px solid rgba(78, 205, 196, 0.2);
 }
 
 #create-options label {
   display: flex;
   align-items: center;
-  gap: 10px;
   justify-content: center;
+  gap: 10px;
+  font-size: 1.2rem;
+  color: #e8f4ff;
 }
 
 select {
   padding: 8px 12px;
-  border: 2px solid #0f3460;
-  border-radius: 6px;
-  background: #16213e;
+  border: 2px solid rgba(72, 157, 217, 0.7);
+  border-radius: 8px;
+  background: rgba(18, 31, 48, 0.9);
   color: #ffffff;
-  font-size: 14px;
+  font-size: 1rem;
   outline: none;
 }
 
@@ -135,35 +157,42 @@ select {
 
 /* 색상 선택 */
 .color-selection {
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
 .color-selection label {
   display: block;
-  margin-bottom: 8px;
-  font-weight: bold;
-  color: #4ECDC4;
+  margin-bottom: 12px;
+  font-weight: 700;
+  color: #4de0d0;
+  text-align: left;
+  font-size: 1.1rem;
 }
 
 .color-buttons {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px 12px;
   justify-content: center;
 }
 
 .color-button {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   border: 3px solid transparent;
   border-radius: 50%;
   cursor: pointer;
-  transition: border-color 0.2s;
+  transition: transform 0.16s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  flex: 0 0 auto;
+}
+
+.color-button:hover {
+  transform: scale(1.05);
 }
 
 .color-button.selected {
   border-color: #ffffff;
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.3);
 }
 
 /* 대기실 */
