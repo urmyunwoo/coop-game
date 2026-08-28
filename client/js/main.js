@@ -25,6 +25,12 @@ const createOptionsEl = document.getElementById('create-options');
 const joinOptionsEl = document.getElementById('join-options');
 const nicknameInput = document.getElementById('nickname');
 
+nicknameInput.addEventListener('input', () => {
+  if (nicknameInput.value.trim()) {
+    hideError();
+  }
+});
+
 let selectedColor = COLORS[0]; // 기본 색상
 
 const displayRoomCodeEl = document.getElementById('display-room-code');
